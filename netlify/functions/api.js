@@ -16,12 +16,13 @@ exports.handler = async (e) => {
     }
     if (b.type === "ai") {
       const model = b.vision
-        ? process.env.GROQ_VISION || "meta-llama/llama-4-scout-17b-16e-instruct"
-        : process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+        ? process.env.GROQ_VISION || "qwen/qwen3.6-27b"
+        : process.env.GROQ_MODEL || "openai/gpt-oss-120b";
+      const extra = model.includes("gpt-oss") ? { reasoning_effort: "low" } : { reasoning_format: "hidden" };
       const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: { "content-type": "application/json", authorization: "Bearer " + process.env.GROQ_KEY },
-        body: JSON.stringify({ model, messages: b.messages, temperature: 0.5, max_tokens: 700 }),
+        body: JSON.stringify({ model, messages: b.messages, temperature: 0.5, max_tokens: 2000, ...extra }),
       });
       return out(r.status, await r.text());
     }
